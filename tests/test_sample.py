@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from uuid import uuid4
+from pydantic import ValidationError
 import pytest
 from try_pydantic.sample import User, UserCreateRequest, UserTable
 
@@ -61,3 +62,17 @@ def test_create_user_from_dataclass():
     assert user.hobbies == user_create_request.hobbies
     assert user.activate_date == user_create_request.activate_date
     assert user.created_at
+
+
+def test_name_length_check():
+    user_create_request = UserCreateRequest(
+        name="p" * 37,
+        email="pat@example.com",
+        hobbies=["reading book", "play the guitar"],
+        activate_date=date.today(),
+    )
+
+    with pytest.raises(ValidationError) as ex:
+        User.from_orm(user_create_request)
+
+    print(ex)

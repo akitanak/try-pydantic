@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from sqlalchemy import Column, Date, String, TIMESTAMP
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -18,6 +18,13 @@ class User(BaseModel):
 
     class Config:
         orm_mode = True
+
+    @validator("name")
+    def check_name_length(cls, name):
+        if len(name) > 36:
+            raise ValueError("name must be no more than 32 characters.")
+
+        return name
 
 
 Base = declarative_base()
