@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import date, datetime
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -30,3 +31,11 @@ class UserTable(Base):
     hobbies = Column(ARRAY(String(32)), nullable=False)
     activate_date = Column(Date, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False)
+
+
+@dataclass
+class UserCreateRequest:
+    name: str
+    email: Optional[str]
+    hobbies: List[str]
+    activate_date: date

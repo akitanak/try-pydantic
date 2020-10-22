@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from uuid import uuid4
 import pytest
-from try_pydantic.sample import User, UserTable
+from try_pydantic.sample import User, UserCreateRequest, UserTable
 
 
 def test_create_user():
@@ -42,3 +42,22 @@ def test_create_user_from_orm_model():
     assert user.hobbies == user_record.hobbies
     assert user.activate_date == user_record.activate_date
     assert user.created_at == user_record.created_at
+
+
+def test_create_user_from_dataclass():
+    """from_orm とは言うが、普通のdataclassからも変換できる。"""
+    user_create_request = UserCreateRequest(
+        name="patric sinatra",
+        email="pat@example.com",
+        hobbies=["reading book", "play the guitar"],
+        activate_date=date.today(),
+    )
+
+    user = User.from_orm(user_create_request)
+
+    assert user.id
+    assert user.name == user_create_request.name
+    assert user.email == user_create_request.email
+    assert user.hobbies == user_create_request.hobbies
+    assert user.activate_date == user_create_request.activate_date
+    assert user.created_at
