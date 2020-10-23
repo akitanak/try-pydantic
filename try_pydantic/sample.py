@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
+import re
 from typing import List, Optional
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, validator
@@ -21,10 +22,26 @@ class User(BaseModel):
 
     @validator("name")
     def check_name_length(cls, name):
-        if len(name) > 36:
+        if len(name) > 32:
             raise ValueError("name must be no more than 32 characters.")
 
         return name
+
+    @validator("name")
+    def name_must_be_alphabetic_chars_and_space(cls, name):
+        name_ = name.replace(" ", "")
+        if not name_.isalpha():
+            raise ValueError("name must be alphabetic characters.")
+
+        return name
+
+    @validator("email")
+    def check_email_format(cls, email):
+        match = re.fullmatch(r"^\w+[.\w]+\w@(\w+\.)+([a-z]+)$", email)
+        if not match:
+            raise ValueError("the value is not email format.")
+
+        return email
 
 
 Base = declarative_base()

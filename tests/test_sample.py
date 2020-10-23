@@ -66,7 +66,7 @@ def test_create_user_from_dataclass():
 
 def test_name_length_check():
     user_create_request = UserCreateRequest(
-        name="p" * 37,
+        name="p" * 33,
         email="pat@example.com",
         hobbies=["reading book", "play the guitar"],
         activate_date=date.today(),
@@ -75,4 +75,54 @@ def test_name_length_check():
     with pytest.raises(ValidationError) as ex:
         User.from_orm(user_create_request)
 
-    print(ex)
+
+def test_name_characters_check():
+    user_create_request = UserCreateRequest(
+        name="patric s1natra",
+        email="pat@example.com",
+        hobbies=["reading book", "play the guitar"],
+        activate_date=date.today(),
+    )
+
+    with pytest.raises(ValidationError) as ex:
+        User.from_orm(user_create_request)
+
+
+def test_name_has_some_errors():
+    user_create_request = UserCreateRequest(
+        name="patric s1natra" * 3,
+        email="pat@example.com",
+        hobbies=["reading book", "play the guitar"],
+        activate_date=date.today(),
+    )
+
+    with pytest.raises(ValidationError) as ex:
+        User.from_orm(user_create_request)
+
+    errors = ex.value.errors()
+    # プロパティに対して複数のバリデータが設定されていた場合、
+    # 定義順で実行され、エラーになったところで返ってくる。
+    assert len(errors) == 1
+    assert errors[0]["loc"] == ("name",)
+    assert errors[0]["msg"] == "name must be no more than 32 characters."
+
+
+def test_some_property_have_errors():
+    user_create_request = UserCreateRequest(
+        name="patric s1natra",
+        email="pat@example",
+        hobbies=["reading book", "play the guitar"],
+        activate_date=date.today(),
+    )
+
+    with pytest.raises(ValidationError) as ex:
+        User.from_orm(user_create_request)
+
+    errors = ex.value.errors()
+    # 複数プロパティにバリデータが設定されていて、複数プロパティでバリデーションエラーになった場合、
+    # 定義順で実行され、それぞれのプロパティのエラーが返ってくる。
+    assert len(errors) == 2
+    assert errors[0]["loc"] == ("name",)
+    assert errors[0]["msg"] == "name must be alphabetic characters."
+    assert errors[1]["loc"] == ("email",)
+    assert errors[1]["msg"] == "the value is not email format."
