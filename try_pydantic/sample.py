@@ -63,3 +63,14 @@ class UserCreateRequest:
     email: Optional[str]
     hobbies: List[str]
     activate_date: date
+
+
+class Term(BaseModel):
+    start: date
+    end: date
+
+    @validator("end")
+    def end_date_must_be_later_than_start_date(cls, end, values):
+        if "start" in values and values["start"] > end:
+            raise ValueError("end date must be later than start date.")
+        return end

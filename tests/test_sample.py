@@ -1,8 +1,8 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from uuid import uuid4
 from pydantic import ValidationError
 import pytest
-from try_pydantic.sample import User, UserCreateRequest, UserTable
+from try_pydantic.sample import Term, User, UserCreateRequest, UserTable
 
 
 def test_create_user():
@@ -126,3 +126,23 @@ def test_some_property_have_errors():
     assert errors[0]["msg"] == "name must be alphabetic characters."
     assert errors[1]["loc"] == ("email",)
     assert errors[1]["msg"] == "the value is not email format."
+
+
+def test_correlation_check():
+    start = date.today()
+    end = start + timedelta(days=1)
+
+    term = Term(start=start, end=end)
+
+    assert term.start == start
+    assert term.end == end
+
+    invalid_end = start - timedelta(days=1)
+
+    with pytest.raises(ValidationError) as ex:
+        Term(start=start, end=invalid_end)
+
+    errors = ex.value.errors()
+    assert len(errors) == 1
+    assert errors[0]["loc"] == ("end",)
+    assert errors[0]["msg"] == "end date must be later than start date."
