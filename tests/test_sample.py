@@ -73,6 +73,11 @@ def test_name_length_check():
             activate_date=date.today(),
         )
 
+    errors = ex.value.errors()
+    assert len(errors) == 1
+    assert errors[0]["loc"] == ("name",)
+    assert errors[0]["msg"] == "name must be no more than 32 characters."
+
 
 def test_name_characters_check():
     with pytest.raises(ValidationError) as ex:
@@ -82,6 +87,11 @@ def test_name_characters_check():
             hobbies=["reading book", "play the guitar"],
             activate_date=date.today(),
         )
+
+    errors = ex.value.errors()
+    assert len(errors) == 1
+    assert errors[0]["loc"] == ("name",)
+    assert errors[0]["msg"] == "name must be alphabetic characters."
 
 
 def test_name_has_some_errors():
