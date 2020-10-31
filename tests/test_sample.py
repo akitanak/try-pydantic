@@ -128,6 +128,25 @@ def test_some_property_have_errors():
     assert errors[1]["msg"] == "the value is not email format."
 
 
+def test_validate_each_list_elements():
+    user_create_request = UserCreateRequest(
+        name="patric sinatra",
+        email="pat@example.com",
+        hobbies=["reading book", "", "  "],
+        activate_date=date.today(),
+    )
+
+    with pytest.raises(ValidationError) as ex:
+        User.from_orm(user_create_request)
+
+    errors = ex.value.errors()
+    assert len(errors) == 2
+    assert errors[0]["loc"] == ("hobbies", 1)
+    assert errors[0]["msg"] == "hobby must not be empty string."
+    assert errors[1]["loc"] == ("hobbies", 2)
+    assert errors[1]["msg"] == "hobby must not be empty string."
+
+
 def test_correlation_check():
     start = date.today()
     end = start + timedelta(days=1)

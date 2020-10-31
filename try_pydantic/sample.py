@@ -43,6 +43,13 @@ class User(BaseModel):
 
         return email
 
+    @validator("hobbies", each_item=True)
+    def hobbies_is_not_empty(cls, hobby):
+        if hobby.strip() == "":
+            raise ValueError("hobby must not be empty string.")
+
+        return hobby
+
 
 Base = declarative_base()
 
