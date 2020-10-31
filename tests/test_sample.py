@@ -128,6 +128,23 @@ def test_some_property_have_errors():
     assert errors[1]["msg"] == "the value is not email format."
 
 
+def test_validator_can_preprocess_property():
+    user_create_request = UserCreateRequest(
+        name="patric sinatra",
+        email="pat@example.com",
+        hobbies="reading book,meditation,party,play the guitar",
+        activate_date=date.today(),
+    )
+
+    user = User.from_orm(user_create_request)
+
+    assert len(user.hobbies) == 4
+    assert user.hobbies[0] == "reading book"
+    assert user.hobbies[1] == "meditation"
+    assert user.hobbies[2] == "party"
+    assert user.hobbies[3] == "play the guitar"
+
+
 def test_validate_each_list_elements():
     user_create_request = UserCreateRequest(
         name="patric sinatra",

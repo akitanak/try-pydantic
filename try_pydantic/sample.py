@@ -43,6 +43,13 @@ class User(BaseModel):
 
         return email
 
+    @validator("hobbies", pre=True)
+    def split_hobby_string_by_comma(cls, hobbies):
+        if isinstance(hobbies, str):
+            return hobbies.split(",")
+
+        return hobbies
+
     @validator("hobbies", each_item=True)
     def hobbies_is_not_empty(cls, hobby):
         if hobby.strip() == "":
