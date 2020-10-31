@@ -65,39 +65,33 @@ def test_create_user_from_dataclass():
 
 
 def test_name_length_check():
-    user_create_request = UserCreateRequest(
-        name="p" * 33,
-        email="pat@example.com",
-        hobbies=["reading book", "play the guitar"],
-        activate_date=date.today(),
-    )
-
     with pytest.raises(ValidationError) as ex:
-        User.from_orm(user_create_request)
+        User(
+            name="p" * 33,
+            email="pat@example.com",
+            hobbies=["reading book", "play the guitar"],
+            activate_date=date.today(),
+        )
 
 
 def test_name_characters_check():
-    user_create_request = UserCreateRequest(
-        name="patric s1natra",
-        email="pat@example.com",
-        hobbies=["reading book", "play the guitar"],
-        activate_date=date.today(),
-    )
-
     with pytest.raises(ValidationError) as ex:
-        User.from_orm(user_create_request)
+        User(
+            name="patric s1natra",
+            email="pat@example.com",
+            hobbies=["reading book", "play the guitar"],
+            activate_date=date.today(),
+        )
 
 
 def test_name_has_some_errors():
-    user_create_request = UserCreateRequest(
-        name="patric s1natra" * 3,
-        email="pat@example.com",
-        hobbies=["reading book", "play the guitar"],
-        activate_date=date.today(),
-    )
-
     with pytest.raises(ValidationError) as ex:
-        User.from_orm(user_create_request)
+        User(
+            name="patric s1natra" * 3,
+            email="pat@example.com",
+            hobbies=["reading book", "play the guitar"],
+            activate_date=date.today(),
+        )
 
     errors = ex.value.errors()
     # プロパティに対して複数のバリデータが設定されていた場合、
@@ -108,15 +102,13 @@ def test_name_has_some_errors():
 
 
 def test_some_property_have_errors():
-    user_create_request = UserCreateRequest(
-        name="patric s1natra",
-        email="pat@example",
-        hobbies=["reading book", "play the guitar"],
-        activate_date=date.today(),
-    )
-
     with pytest.raises(ValidationError) as ex:
-        User.from_orm(user_create_request)
+        User(
+            name="patric s1natra",
+            email="pat@example",
+            hobbies=["reading book", "play the guitar"],
+            activate_date=date.today(),
+        )
 
     errors = ex.value.errors()
     # 複数プロパティにバリデータが設定されていて、複数プロパティでバリデーションエラーになった場合、
@@ -129,14 +121,12 @@ def test_some_property_have_errors():
 
 
 def test_validator_can_preprocess_property():
-    user_create_request = UserCreateRequest(
+    user = User(
         name="patric sinatra",
         email="pat@example.com",
         hobbies="reading book,meditation,party,play the guitar",
         activate_date=date.today(),
     )
-
-    user = User.from_orm(user_create_request)
 
     assert len(user.hobbies) == 4
     assert user.hobbies[0] == "reading book"
@@ -146,15 +136,13 @@ def test_validator_can_preprocess_property():
 
 
 def test_validate_each_list_elements():
-    user_create_request = UserCreateRequest(
-        name="patric sinatra",
-        email="pat@example.com",
-        hobbies=["reading book", "", "  "],
-        activate_date=date.today(),
-    )
-
     with pytest.raises(ValidationError) as ex:
-        User.from_orm(user_create_request)
+        User(
+            name="patric sinatra",
+            email="pat@example.com",
+            hobbies=["reading book", "", "  "],
+            activate_date=date.today(),
+        )
 
     errors = ex.value.errors()
     assert len(errors) == 2
